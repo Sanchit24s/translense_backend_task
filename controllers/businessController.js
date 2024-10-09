@@ -135,7 +135,6 @@ const sendOTP = async (req, res) => {
 
         const otpExpiration = new Date();
         otpExpiration.setMinutes(otpExpiration.getMinutes() + 5);
-        console.log(otp, otpExpiration);
 
         const business = await businessInfoModel.findOne({ email: email });
 

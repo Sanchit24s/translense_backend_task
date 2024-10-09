@@ -153,7 +153,6 @@ const sendOTP = async (req, res) => {
         otpExpiration.setMinutes(otpExpiration.getMinutes() + 5);
 
         const owner = await ownerModel.findOne({ email: email });
-        console.log(otp, otpExpiration, owner);
 
         if (!owner) {
             return res.status(404).json({ message: "Owner not found" });
@@ -197,7 +196,7 @@ const verifyOTP = async (req, res) => {
             return res.status(400).json({ message: "OTP has expired" });
         }
 
-        const updatedOwner = await ownerModel.findOneAndUpdate(
+        await ownerModel.findOneAndUpdate(
             { email: email },
             {
                 $set: {
