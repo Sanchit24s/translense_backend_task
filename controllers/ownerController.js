@@ -1,6 +1,7 @@
 const ownerModel = require("../models/ownerModel");
 const businessModel = require("../models/businessInfoModel");
 const validator = require("validator");
+const { sendOTPByEmail } = require("../services/emailService");
 
 const createOwner = async (req, res) => {
     try {
@@ -151,8 +152,15 @@ const sendOTP = async (req, res) => {
         const otpExpiration = new Date();
         otpExpiration.setMinutes(otpExpiration.getMinutes() + 5);
 
-        const owner = await ownerModel.findByIdAndUpdate(
-            email,
+        const owner = await ownerModel.findOne({ email: email });
+        console.log(otp, otpExpiration, owner);
+
+        if (!owner) {
+            return res.status(404).json({ message: "Owner not found" });
+        }
+
+        await ownerModel.findByIdAndUpdate(
+            owner.id,
             {
                 $set: {
                     otp: otp,
@@ -162,9 +170,7 @@ const sendOTP = async (req, res) => {
             { new: true }
         );
 
-        if (!owner) {
-            return res.status(404).json({ message: "Owner not found" });
-        }
+        sendOTPByEmail(email, otp);
 
         res.status(200).json({ message: "OTP sent successfully" });
     } catch (error) {

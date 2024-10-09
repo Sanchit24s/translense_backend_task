@@ -1,5 +1,6 @@
 const businessInfoModel = require("../models/businessInfoModel");
 const validator = require("validator");
+const { sendOTPByEmail } = require("../services/emailService");
 
 const createBusinessInfo = async (req, res) => {
     try {
@@ -134,9 +135,16 @@ const sendOTP = async (req, res) => {
 
         const otpExpiration = new Date();
         otpExpiration.setMinutes(otpExpiration.getMinutes() + 5);
+        console.log(otp, otpExpiration);
 
-        const business = await businessInfoModel.findByIdAndUpdate(
-            email,
+        const business = await businessInfoModel.findOne({ email: email });
+
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+
+        await businessInfoModel.findByIdAndUpdate(
+            business.id,
             {
                 $set: {
                     otp: otp,
@@ -146,9 +154,7 @@ const sendOTP = async (req, res) => {
             { new: true }
         );
 
-        if (!business) {
-            return res.status(404).json({ message: "Business not found" });
-        }
+        sendOTPByEmail(email, otp);
 
         res.status(200).json({ message: "OTP sent successfully" });
     } catch (error) {
@@ -175,7 +181,7 @@ const verifyOTP = async (req, res) => {
             return res.status(400).json({ message: "OTP has expired" });
         }
 
-        const updatedBusiness = await businessInfoModel.findOneAndUpdate(
+        await businessInfoModel.findOneAndUpdate(
             { email: email },
             {
                 $set: {

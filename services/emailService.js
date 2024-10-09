@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function sendOTP(email, otp) {
+async function sendOTPByEmail(email, otp) {
     try {
         const mailOptions = {
             from: {
@@ -36,4 +36,4 @@ async function sendOTP(email, otp) {
     }
 }
 
-module.exports = { sendOTP };
+module.exports = { sendOTPByEmail };
